@@ -4,7 +4,7 @@ sequenceDiagram
     participant browser
     participant server
 
-    Note right of browser: When the form button is clicked the user input will be sent to the server, then...
+    Note right of browser: When the form button is clicked the user input will be sent to the server
 
     browser->>server: POST https://studies.cs.helsinki.fi/exampleapp/new_note
     activate server
