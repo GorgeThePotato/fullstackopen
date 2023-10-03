@@ -18,17 +18,17 @@ sequenceDiagram
 
     browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.css
     activate server
-    server-->>browser: Fetching style sheet (CSS)
+    server-->>browser: Style sheet (CSS)
     deactivate server
 
     browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/main.js
     activate server
-    server-->>browser: Fetching js (JavaScript)
+    server-->>browser: JS file (JavaScript)
     deactivate server
 
     browser->>server: GET https://studies.cs.helsinki.fi/exampleapp/data.json
     activate server
-    server-->>browser: Fetching raw data of the notes (JSON)
+    server-->>browser: Raw data of the notes (JSON)
     deactivate server
 
 ```
