@@ -1,10 +1,10 @@
-const Persons = ({persons, searchName}) =>{
+const Persons = ({persons, searchName, deleteUser}) =>{
     return(
         <ul>
         {persons
           .filter(person => person.name.match(searchName))
           .map(person =>{
-            return <li key={person.name}>{person.name} {person.number}</li>
+            return <li key={person.name}>{person.name} {person.number} <button onClick={() => deleteUser(person.id)}>delete</button></li>
           })}
       </ul>
     )
