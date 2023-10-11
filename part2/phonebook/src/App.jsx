@@ -4,13 +4,16 @@ import Form from './components/Form'
 import Persons from './components/Persons'
 import axios from 'axios'
 import personService from './services/persons'
-
+import Notification from './components/Notification'
+import Error from './components/ErrorMessage'
 
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('');
   const [searchName, setSearchName] = useState('');
+  const [notificationMessage, setNotificationMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null);
 
   const deleteUser = (id) =>{
     const user = persons.find(u => u.id === id);
@@ -48,7 +51,23 @@ const App = () => {
           .then(response =>{
             setPersons(persons.map(person=>person.id !== user.id ? person : response.data))
           })
-
+          .then(() =>{
+            setNotificationMessage(
+              `User ${user.name} number has been modified`
+            )
+            setTimeout(() =>{
+              setNotificationMessage(null)
+            },5000)
+          })
+          .catch(error =>{
+            setErrorMessage(
+              `User ${user.name} number has been deleted from the server`
+            )
+            setTimeout(() =>{
+              setErrorMessage(null)
+            },5000)
+            setPersons(persons.filter(p =>p.id !== user.id));
+          })
       }
     }
     else{
@@ -62,9 +81,15 @@ const App = () => {
         .createPerson(personObject)
         .then(newPerson =>{
           setPersons(persons.concat(newPerson))
-          setNewName('')
-          setNewNumber('')
         })
+        setNotificationMessage(
+          `Added ${newName}`
+        )
+        setTimeout(() =>{
+          setNotificationMessage(null)
+        },5000)
+        setNewName('')
+        setNewNumber('')
     }
   }
 
@@ -91,6 +116,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+        <Notification message={notificationMessage}/>
+        <Error errorMessage={errorMessage}/>
         <Filter value={searchName} onChange={handleSearchChange}/>
       <h2>add a new</h2>
         <Form addNumber={addNumber} newName={newName} handleNameChange={handleNameChange} handleNumberChange={handleNumberChange} newNumber={newNumber}/>
