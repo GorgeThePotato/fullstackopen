@@ -61,7 +61,7 @@ const App = () => {
           })
           .catch(error =>{
             setErrorMessage(
-              `User ${user.name} number has been deleted from the server`
+              `${error.response.data.error}`
             )
             setTimeout(() =>{
               setErrorMessage(null)
@@ -81,10 +81,15 @@ const App = () => {
         .createPerson(personObject)
         .then(newPerson =>{
           setPersons(persons.concat(newPerson))
+          setNotificationMessage(
+            `Added ${newName}`
+          )
         })
-        setNotificationMessage(
-          `Added ${newName}`
-        )
+        .catch(error =>{
+          setErrorMessage(
+            `${error.response.data.error}`
+          )
+        })
         setTimeout(() =>{
           setNotificationMessage(null)
         },5000)
