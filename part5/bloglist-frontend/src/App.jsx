@@ -13,16 +13,16 @@ const App = () => {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user,setUser] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState(null)
   const [notification, setNotification] = useState(null)
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
-    )  
+    ) 
   }, [])
 
-  useEffect(() =>{
+  useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogAppUser')
     if(loggedUserJSON){
       const user = JSON.parse(loggedUserJSON)
@@ -30,10 +30,10 @@ const App = () => {
     }
   },[])
 
-  const handleLogin = async (event) =>{
+  const handleLogin = async (event) => {
     event.preventDefault()
     try {
-      const user = await loginService.login({username,password})
+      const user = await loginService.login({ username,password })
       blogService.setToken(user.token)
       setUser(user)
       setUsername('')
@@ -41,39 +41,73 @@ const App = () => {
       window.localStorage.setItem('loggedBlogAppUser', JSON.stringify(user))
     } catch (exception) {
       setErrorMessage('Wrong username or password')
-      setTimeout(() =>{
+      setTimeout(() => {
         setErrorMessage(null)
       },5000)
     }
   }
 
-  const handleLogOut = (event) =>{
+  const handleLogOut = (event) => {
     event.preventDefault()
     try{
       window.localStorage.removeItem('loggedBlogappUser')
       window.localStorage.clear()
       setUser(null)
     }
-    catch(exception){
-
+    catch (exception) {
+      setErrorMessage('Unable to logout!')
+      setTimeout(() =>{
+        setErrorMessage(null)
+      },5000)
     }
   }
 
-  const addBlog = (blogObject) =>{
+  const addBlog = (blogObject) => {
     try {
       blogFormRef.current.toggleVisibility()
       blogService.createBlog(blogObject)
-      .then(returnedBlog =>{
+      .then(returnedBlog => {
         setBlogs(blogs.concat(returnedBlog))
       })
-      .then(()=>{
+      .then(() => {
         setNotification(`a new blog ${blogObject.title} by ${blogObject.author} added`)
-        setTimeout(() =>{
+        setTimeout(() => {
           setNotification(null)
         },5000)
       })
     } catch (exception) {
       setErrorMessage('Unable to add the blog!')
+      setTimeout(() => {
+        setErrorMessage(null)
+      },5000)
+    }
+  }
+
+  const updateLikes = async (blogObject) => {
+    try {
+      const blogId = blogObject.id
+      const blogToUpdate = {
+        likes: blogObject.likes + 1
+      }
+      await blogService.updateBlogLikes(blogId,blogToUpdate)
+      const blogList = await blogService.getAll()
+      setBlogs(blogList)
+    }  catch (exception) {
+      setErrorMessage('Unable to update the blog!')
+      setTimeout(() => {
+        setErrorMessage(null)
+      },5000)
+    }
+  }
+
+  const deleteBlog = async (blogObject) => {
+    try {
+      const blogId = blogObject.id
+      await blogService.deleteBlog(blogId)
+      const blogList = await blogService.getAll()
+      setBlogs(blogList)
+    } catch (exception) {
+      setErrorMessage('Unable to delete the blog!')
       setTimeout(() =>{
         setErrorMessage(null)
       },5000)
@@ -104,13 +138,19 @@ const App = () => {
     )
   }
 
-  const blogList = () => (
-    <div>
-      {blogs.map(blog =>
-      <Blog key={blog.id} blog={blog}/>
-    )}
-    </div>
-  )
+  const blogList = () => {
+    const compareByLikes = (a,b) => {
+      return b.likes - a.likes
+    }
+    const sortedBlogs = blogs.sort(compareByLikes)
+    return(
+      <div>
+        {sortedBlogs.map(blog =>
+        <Blog key={blog.id} blog={blog} updateLikes={updateLikes} deleteBlog={deleteBlog} user={user}/>
+        )}
+      </div>
+    )
+  }
 
   return (
     <div>
