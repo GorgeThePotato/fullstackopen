@@ -8,7 +8,7 @@ const LikeButton = ({blog,updateLikes}) => {
     }
 
     return(
-        <button key={blog.id} onClick={() =>updateBlog(blog)}>like</button>
+        <button key={blog.id} onClick={() =>updateBlog(blog)} className='like_button'>like</button>
     )
 }
 export default LikeButton
