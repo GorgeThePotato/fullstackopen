@@ -13,8 +13,11 @@ const Filter = () => {
     }
   
     return (
-      <div style={style}>
-        filter <input onChange={handleChange} />
+      <div>
+        <h2>Anecdotes</h2>
+        <div style={style}>
+          filter <input onChange={handleChange} />
+        </div>
       </div>
     )
   }
