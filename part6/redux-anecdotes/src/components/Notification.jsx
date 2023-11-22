@@ -3,6 +3,9 @@ import notificationReducer from "../reducers/notificationReducer"
 
 const Notification = () => {
   const notification = useSelector(state => state.notification)
+  if(notification === null){
+    return null
+  }
   const style = {
     border: 'solid',
     padding: 10,
