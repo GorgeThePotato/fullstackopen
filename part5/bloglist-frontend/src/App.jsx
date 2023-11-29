@@ -1,171 +1,123 @@
-import { useState, useEffect, useRef } from 'react'
-import Blog from './components/Blog'
-import Error from './components/ErrorMessage'
-import LoginForm from './components/LoginForm'
-import BlogForm  from './components/BlogForm'
-import Togglable from './components/Togglable'
-import Notification from './components/Notification'
-import blogService from './services/blogs'
-import loginService from './services/login'
+import { useState, useEffect, useRef } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import Blog from "./components/Blog";
+import Error from "./components/ErrorMessage";
+import LoginForm from "./components/LoginForm";
+import BlogForm from "./components/BlogForm";
+import Togglable from "./components/Togglable";
+import Notification from "./components/Notification";
+import Users from "./components/Users";
+import blogService from "./services/blogs";
+import errorReducer, { setError } from "./reducers/errorReducer";
+import { initializedBlogs, addBlog } from "./reducers/blogReducer";
+import userReducer, { setUser } from "./reducers/userReducer";
+import usersReducer, { initializedUsers } from "./reducers/usersReducer";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Link,
+  Navigate,
+  useParams,
+  useNavigate,
+} from "react-router-dom";
 
 const App = () => {
-  const [blogs, setBlogs] = useState([])
-  const [username, setUsername] = useState('')
-  const [password, setPassword] = useState('')
-  const [user,setUser] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
-  const [notification, setNotification] = useState(null)
+  const dispatch = useDispatch();
+
+  const user = useSelector((state) => state.user);
 
   useEffect(() => {
-    blogService.getAll().then(blogs =>
-      setBlogs( blogs )
-    ) 
-  }, [])
+    dispatch(initializedBlogs());
+    dispatch(initializedUsers());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const blogs = useSelector((state) => state.blogs);
+  const users = useSelector((state) => state.users);
+  console.log(users);
 
   useEffect(() => {
-    const loggedUserJSON = window.localStorage.getItem('loggedBlogAppUser')
-    if(loggedUserJSON){
-      const user = JSON.parse(loggedUserJSON)
-      setUser(user)
-      blogService.setToken(user.token)
+    if (user) {
+      blogService.setToken(user.token);
     }
-  },[])
-
-  const handleLogin = async (event) => {
-    event.preventDefault()
-    try {
-      const user = await loginService.login({ username,password })
-      blogService.setToken(user.token)
-      setUser(user)
-      setUsername('')
-      setPassword('')
-      window.localStorage.setItem('loggedBlogAppUser', JSON.stringify(user))
-    } catch (exception) {
-      setErrorMessage('Wrong username or password')
-      setTimeout(() => {
-        setErrorMessage(null)
-      },5000)
-    }
-  }
+  }, [user]);
 
   const handleLogOut = (event) => {
-    event.preventDefault()
-    try{
-      window.localStorage.removeItem('loggedBlogappUser')
-      window.localStorage.clear()
-      setUser(null)
-    }
-    catch (exception) {
-      setErrorMessage('Unable to logout!')
-      setTimeout(() =>{
-        setErrorMessage(null)
-      },5000)
-    }
-  }
-
-  const addBlog = (blogObject) => {
+    event.preventDefault();
     try {
-      blogFormRef.current.toggleVisibility()
-      blogService.createBlog(blogObject)
-      .then(returnedBlog => {
-        setBlogs(blogs.concat(returnedBlog))
-      })
-      .then(() => {
-        setNotification(`a new blog ${blogObject.title} by ${blogObject.author} added`)
-        setTimeout(() => {
-          setNotification(null)
-        },5000)
-      })
+      dispatch(setUser(null));
     } catch (exception) {
-      setErrorMessage('Unable to add the blog!')
-      setTimeout(() => {
-        setErrorMessage(null)
-      },5000)
+      dispatch(setError(`Unable to log out`, 5));
     }
-  }
+  };
 
-  const updateLikes = async (blogObject) => {
-    try {
-      const blogId = blogObject.id
-      const blogToUpdate = {
-        likes: blogObject.likes + 1
-      }
-      await blogService.updateBlogLikes(blogId,blogToUpdate)
-      const blogList = await blogService.getAll()
-      setBlogs(blogList)
-    }  catch (exception) {
-      setErrorMessage('Unable to update the blog!')
-      setTimeout(() => {
-        setErrorMessage(null)
-      },5000)
-    }
-  }
-
-  const deleteBlog = async (blogObject) => {
-    try {
-      const blogId = blogObject.id
-      await blogService.deleteBlog(blogId)
-      const blogList = await blogService.getAll()
-      setBlogs(blogList)
-    } catch (exception) {
-      setErrorMessage('Unable to delete the blog!')
-      setTimeout(() =>{
-        setErrorMessage(null)
-      },5000)
-    }
-  }
-
-  const blogFormRef = useRef()
+  const blogFormRef = useRef();
 
   const blogForm = () => {
-    return(
-      <Togglable buttonLabel='new blog' ref={blogFormRef}>
-        <BlogForm createBlog={addBlog} />
+    return (
+      <Togglable buttonLabel="new blog" ref={blogFormRef}>
+        <BlogForm />
       </Togglable>
-    )
-  }
+    );
+  };
 
   const loginForm = () => {
     return (
-      <Togglable buttonLabel='login'>
-        <LoginForm
-          username={username}
-          password={password}
-          handleUsernameChange={({ target }) => setUsername(target.value)}
-          handlePasswordChange={({ target }) => setPassword(target.value)}
-          handleSubmit={handleLogin}
-        />
+      <Togglable buttonLabel="login">
+        <LoginForm />
       </Togglable>
-    )
-  }
+    );
+  };
 
   const blogList = () => {
-    const compareByLikes = (a,b) => {
-      return b.likes - a.likes
-    }
-    const sortedBlogs = blogs.sort(compareByLikes)
-    return(
+    const compareByLikes = (a, b) => {
+      return b.likes - a.likes;
+    };
+    const blogsToSort = [...blogs];
+    const sortedBlogs = blogsToSort.sort(compareByLikes);
+    return (
       <div>
-        {sortedBlogs.map(blog =>
-        <Blog key={blog.id} blog={blog} updateLikes={updateLikes} deleteBlog={deleteBlog} user={user}/>
-        )}
+        {sortedBlogs.map((blog) => (
+          <Blog key={blog.id} blog={blog} user={user} />
+        ))}
       </div>
-    )
-  }
+    );
+  };
+
+  const userList = () => {
+    return (
+      <Router>
+        <div>
+          <Link to="/users"></Link>
+        </div>
+        <Routes>
+          <Route path="/users" element={<Users users={users} />} />
+        </Routes>
+      </Router>
+    );
+  };
 
   return (
     <div>
       <h1>Blogs</h1>
-
-      <Error errorMessage={errorMessage}/>
-      <Notification message={notification}/>
+      <Error />
+      <Notification />
       {!user && loginForm()}
-      {user && <div>
-        <p>{user.name} logged in <button onClick={handleLogOut}>log out</button></p><br />
-        {blogForm()} <br />
-        {blogList()}</div>}
+      {user && (
+        <div>
+          <p>
+            {user.name} logged in{" "}
+            <button onClick={handleLogOut}>log out</button>
+          </p>
+          <br />
+          {blogForm()} <br />
+          {blogList()} <br />
+          {userList()}
+        </div>
+      )}
     </div>
-  )
-}
+  );
+};
 
-export default App
+export default App;

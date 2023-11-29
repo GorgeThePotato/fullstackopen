@@ -1,48 +1,38 @@
-import PropTypes from 'prop-types'
+import { useDispatch } from "react-redux";
+import userReducer, { userData } from "../reducers/userReducer";
+import errorReducer, { setError } from "../reducers/errorReducer";
 
-const LoginForm = ({
-    handleSubmit,
-    handleUsernameChange,
-    handlePasswordChange,
-    username,
-    password
-    }) => {
-    return(
+const LoginForm = () => {
+  const dispatch = useDispatch();
+
+  const login = async (event) => {
+    event.preventDefault();
+    const username = event.target.Username.value;
+    const password = event.target.Password.value;
+    try {
+      dispatch(userData({ username, password }));
+    } catch (error) {
+      dispatch(setError(`Unable to log in ${error}`));
+    }
+  };
+  return (
     <div>
-        <h2>Login</h2>
-        <form onSubmit={handleSubmit}>
-            <div>
-                username
-                <input
-                    type="text"
-                    value={username}
-                    name="Username"
-                    onChange={handleUsernameChange}
-                    id='username'
-                />
-            </div>
-            <div>
-                password
-                <input
-                    type="password"
-                    value={password}
-                    name="Password"
-                    onChange={handlePasswordChange}
-                    id='password'
-                />
-            </div>
-            <button type="submit" id='login-button'>login</button>
-        </form>
+      <h2>Login</h2>
+      <form onSubmit={login}>
+        <div>
+          username
+          <input type="text" name="Username" id="username" />
+        </div>
+        <div>
+          password
+          <input type="password" name="Password" id="password" />
+        </div>
+        <button type="submit" id="login-button">
+          login
+        </button>
+      </form>
     </div>
-    )
-}
+  );
+};
 
-LoginForm.propTypes={
-    handleSubmit: PropTypes.func.isRequired,
-    handlePasswordChange: PropTypes.func.isRequired,
-    handleUsernameChange: PropTypes.func.isRequired,
-    username: PropTypes.string.isRequired,
-    password: PropTypes.string.isRequired
-}
-
-export default LoginForm
+export default LoginForm;
