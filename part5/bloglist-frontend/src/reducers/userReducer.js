@@ -18,6 +18,7 @@ export const { setUser } = userSlice.actions;
 export const userData = (credentials) => {
   return async (dispatch) => {
     const user = await userService.login(credentials);
+    window.localStorage.setItem('loggedBlogAppUser', JSON.stringify(user))
     dispatch(setUser(user));
   };
 };

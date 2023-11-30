@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import Blog from "./components/Blog";
 import Error from "./components/ErrorMessage";
 import LoginForm from "./components/LoginForm";
 import BlogForm from "./components/BlogForm";
 import Togglable from "./components/Togglable";
 import Notification from "./components/Notification";
 import Users from "./components/Users";
+import User from "./components/User";
+import BlogList from "./components/BlogList";
+import Blog from "./components/Blog";
 import blogService from "./services/blogs";
 import errorReducer, { setError } from "./reducers/errorReducer";
 import { initializedBlogs, addBlog } from "./reducers/blogReducer";
@@ -35,7 +37,6 @@ const App = () => {
 
   const blogs = useSelector((state) => state.blogs);
   const users = useSelector((state) => state.users);
-  console.log(users);
 
   useEffect(() => {
     if (user) {
@@ -52,16 +53,6 @@ const App = () => {
     }
   };
 
-  const blogFormRef = useRef();
-
-  const blogForm = () => {
-    return (
-      <Togglable buttonLabel="new blog" ref={blogFormRef}>
-        <BlogForm />
-      </Togglable>
-    );
-  };
-
   const loginForm = () => {
     return (
       <Togglable buttonLabel="login">
@@ -69,54 +60,33 @@ const App = () => {
       </Togglable>
     );
   };
-
-  const blogList = () => {
-    const compareByLikes = (a, b) => {
-      return b.likes - a.likes;
-    };
-    const blogsToSort = [...blogs];
-    const sortedBlogs = blogsToSort.sort(compareByLikes);
-    return (
-      <div>
-        {sortedBlogs.map((blog) => (
-          <Blog key={blog.id} blog={blog} user={user} />
-        ))}
-      </div>
-    );
-  };
-
-  const userList = () => {
-    return (
-      <Router>
-        <div>
-          <Link to="/users"></Link>
-        </div>
-        <Routes>
-          <Route path="/users" element={<Users users={users} />} />
-        </Routes>
-      </Router>
-    );
-  };
+  const padding = {
+    paddingRight: 5
+  }
 
   return (
-    <div>
-      <h1>Blogs</h1>
-      <Error />
-      <Notification />
-      {!user && loginForm()}
-      {user && (
-        <div>
-          <p>
-            {user.name} logged in{" "}
-            <button onClick={handleLogOut}>log out</button>
-          </p>
-          <br />
-          {blogForm()} <br />
-          {blogList()} <br />
-          {userList()}
-        </div>
-      )}
-    </div>
+    <Router>
+      <div>
+        {user && (
+          <div>
+            <Link style={padding} to="/">blogs</Link>
+            <Link style={padding} to="/users">users</Link>
+            <p style={{display: 'inline-block'}}>{user.name} logged in <button onClick={handleLogOut}>log out</button></p>
+            <h1>Blogs</h1>
+            <Routes>
+              <Route path="/" element={<BlogList blogs={blogs} user={user}/>}/>
+              <Route path="/users" element={<Users users={users} />} />
+              <Route path="/users/:id" element={<User users={users}/>} />
+              <Route path="/blogs/:id" element={<Blog blogs={blogs} user={user}/>} />
+            </Routes>
+          </div>
+        )}
+        <Error />
+        <Notification />
+        {!user && <div>
+          <h1>Log in to the blog app!</h1>{loginForm()}</div>}
+      </div>
+    </Router>
   );
 };
 

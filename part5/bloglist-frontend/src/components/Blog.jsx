@@ -1,52 +1,45 @@
 import { useState } from "react";
 import LikeButton from "./LikeButton";
 import RemoveButton from "./RemoveButton";
+import CommentForm from "./CommentForm";
+import { BrowserRouter as Router,
+  Routes, 
+  Route, 
+  Link, 
+  Navigate, 
+  useParams, 
+  useNavigate } from 'react-router-dom'
 
-const Blog = ({ blog, user }) => {
-  const [visible, setVisible] = useState(false);
+const Blog = ({ blogs, user }) => {
+  const blogId = useParams().id
+  const blog = blogs.find(b => b.id === blogId)
 
-  const hideWhenVisible = { display: visible ? "none" : "" };
-  const showWhenVisible = { display: visible ? "" : "none" };
+  if(!blog){
+    return null
+  }
+  
+  const comments = [...blog.comments]
 
-  const toggleVisibility = () => {
-    setVisible(!visible);
-  };
+  function generateID() {
+    return Math.random().toString(36);
+  }
 
-  const blogStyle = {
-    paddingTop: 0,
-    paddingLeft: 2,
-    border: "solid",
-    borderWidth: 1,
-    marginBottom: 5,
-  };
-  const pStyle = {
-    display: "inline-block",
-  };
   return (
-    <div style={blogStyle} className="blog">
-      <p className="blog_title">
+    <div className="blog">
+      <h1 className="blog_title">
         {blog.title}
-        <button
-          style={hideWhenVisible}
-          onClick={toggleVisibility}
-          className="show_details"
-        >
-          view
-        </button>
-        <button style={showWhenVisible} onClick={toggleVisibility}>
-          hide
-        </button>
-      </p>
-      <p className="blog_author">{blog.author}</p>
-      <div style={showWhenVisible} className="blog_details">
-        <p className="blog_url">{blog.url}</p>
-        <p className="blog_likes" style={pStyle}>
-          {blog.likes}
-        </p>
-        <LikeButton blog={blog} />
-        <br />
+      </h1>
+      <p className="blog_url">{blog.url}</p>
+      <p className="blog_likes">{blog.likes} likes<LikeButton blog={blog} /></p>
+      <p className="blog_author">Added by {blog.author}</p>
         {user.name === blog.user.name && <RemoveButton blog={blog} />}
-      </div>
+      <h3>comments</h3>
+      <CommentForm blog={blog}/>
+      <ul>
+        {comments.map((comment)=>(
+          <li key={generateID()}>{comment}</li>
+        ))}
+      </ul>
     </div>
   );
 };
