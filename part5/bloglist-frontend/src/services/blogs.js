@@ -26,7 +26,6 @@ const updateBlogLikes = async (id, newObject) => {
 };
 
 const updateBlogComments = async (id, newObject) =>{
-  console.log(newObject)
   const response = await axios.post(`${baseUrl}/${id}/comments`, newObject);
   return response.data;
 }

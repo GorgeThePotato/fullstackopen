@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
+import { Container } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import Error from "./components/ErrorMessage";
 import LoginForm from "./components/LoginForm";
-import BlogForm from "./components/BlogForm";
 import Togglable from "./components/Togglable";
 import Notification from "./components/Notification";
 import Users from "./components/Users";
@@ -65,6 +65,7 @@ const App = () => {
   }
 
   return (
+    <Container>
     <Router>
       <div>
         {user && (
@@ -87,6 +88,7 @@ const App = () => {
           <h1>Log in to the blog app!</h1>{loginForm()}</div>}
       </div>
     </Router>
+    </Container>
   );
 };
 

@@ -9,6 +9,13 @@ import { BrowserRouter as Router,
 
 import Togglable from './Togglable';
 import BlogForm from './BlogForm';
+import Table from '@mui/material/Table';
+import TableBody from '@mui/material/TableBody';
+import TableCell from '@mui/material/TableCell';
+import TableContainer from '@mui/material/TableContainer';
+import TableHead from '@mui/material/TableHead';
+import TableRow from '@mui/material/TableRow';
+import Paper from '@mui/material/Paper';
 
 const BlogList = ({ blogs }) => {
 
@@ -42,13 +49,15 @@ const BlogList = ({ blogs }) => {
           {blogForm()} <br />
           {sortedBlogs.map((blog) => (
             <div style={blogStyle} key={blog.id}>
-                <table>
-                    <tbody>
-                        <tr>
-                            <td><Link to={`/blogs/${blog.id}`}>{blog.title}</Link></td>
-                        </tr>
-                    </tbody>
-                </table>
+              <TableContainer  component={Paper}>
+                <Table  sx={{ minWidth: 650 }} aria-label="simple table">
+                    <TableBody>
+                        <TableRow  sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+                            <TableCell><Link to={`/blogs/${blog.id}`}>{blog.title}</Link></TableCell>
+                        </TableRow>
+                    </TableBody>
+                </Table>
+              </TableContainer>
             </div>
           ))}
         </div>
