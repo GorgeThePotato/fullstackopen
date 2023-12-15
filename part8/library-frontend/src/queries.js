@@ -57,3 +57,13 @@ export const LOGIN = gql`
             value
         }
     }`
+
+export const BOOK_ADDED = gql`
+    subscription {
+        bookAdded {
+            title
+            author {name}
+            genres
+            published
+        }
+    }`

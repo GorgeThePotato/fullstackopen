@@ -1,11 +1,26 @@
 import { useState } from 'react'
-import { useApolloClient, useQuery } from '@apollo/client'
+import { useApolloClient, useQuery, useSubscription } from '@apollo/client'
 import Authors from './components/Authors'
 import Books from './components/Books'
 import NewBook from './components/NewBook'
 import LoginForm from './components/LoginForm'
 import Recommend from './components/Recommend'
-import { ALL_AUTHORS, ALL_BOOKS, ME } from './queries'
+import { ALL_AUTHORS, ALL_BOOKS, BOOK_ADDED, ME } from './queries'
+
+export const updateCache = (cache, query, addedBook) => {
+  const uniqByTitle = (a) => {
+    let seen = new Set()
+    return a.filter((item) => {
+      let k = item.title
+      return seen.has(k) ? false : seen.add(k)
+    })
+  }
+  cache.updateQuery(query, ({ allBooks }) => {
+    return {
+      allBooks: uniqByTitle(allBooks.concat(addedBook))
+    }
+  })
+}
 
 const App = () => {
   const authors = useQuery(ALL_AUTHORS)
@@ -15,6 +30,13 @@ const App = () => {
   const [page, setPage] = useState('authors')
   const client = useApolloClient()
 
+  useSubscription(BOOK_ADDED, {
+    onData: ({ data, client }) => {
+      window.alert("New book was added!")
+      const addedBook = data.data.bookAdded
+      updateCache(client.cache, {query: ALL_BOOKS }, addedBook)
+    }
+  })
   const logout = () => {
     setToken(null)
     localStorage.clear()
@@ -49,6 +71,7 @@ const App = () => {
           <button onClick={() => setPage('add')}>add book</button>
           <button onClick={() => setPage('recommend')}>recommend</button>
           <button onClick={logout}>logout</button>
+          <Recommend show={page === 'recommend'} books={books.data.allBooks} favouriteGenre={user.data.me.favouriteGenre}/>
         </div>}
         </div> 
       <div>
@@ -56,8 +79,6 @@ const App = () => {
       <Authors show={page === 'authors'} authors={authors.data.allAuthors} />
 
       <Books show={page === 'books'} books={books.data.allBooks}/>
-
-      <Recommend show={page === 'recommend'} books={books.data.allBooks} favouriteGenre={user.data.me.favouriteGenre}/>
 
       <NewBook show={page === 'add'} />
     </div>
