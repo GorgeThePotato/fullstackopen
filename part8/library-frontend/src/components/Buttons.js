@@ -1,10 +1,10 @@
-const Buttons = ({filterBooks, setDisplayedBooks, uniqueGenres, books}) =>{
+const Buttons = ({filterBooks, setDisplayedBooks, uniqueGenres}) =>{
     return(
         <div>
             {uniqueGenres.map((genre,i)=>(
                 <button key={i+1} onClick={() => filterBooks(genre)}>{genre}</button>
             ))}
-            <button onClick={() => setDisplayedBooks(books)}>all genres</button>
+            <button onClick={() => filterBooks()}>all genres</button>
       </div>
     )
 }

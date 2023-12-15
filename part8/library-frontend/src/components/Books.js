@@ -1,12 +1,30 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useQuery } from "@apollo/client"
 import { ALL_BOOKS } from "../queries"
 import Book from "./Book"
 import Buttons from "./Buttons"
 
-const Books = ({show, books}) => {
+const Books = ({show}) => {
+  const [displayedBooks,setDisplayedBooks] = useState([])
+  const [books,setBooks] = useState([])
+  const [genre, setGenre] = useState()
 
-  const [displayedBooks,setDisplayedBooks] = useState(books)
+  const { data, refetch } = useQuery(ALL_BOOKS, {
+    variables: { genre }
+  });
+
+  useEffect(() => {
+    if (data) {
+      setDisplayedBooks(data.allBooks);
+      refetch()
+    }
+  }, [data]);
+
+  useEffect(() => {
+    if(data) {
+      setBooks(data.allBooks)
+    }
+  },[displayedBooks])
 
   if (!show) {
     return null
@@ -22,23 +40,19 @@ const Books = ({show, books}) => {
 
   const uniqueBookGenres = uniqueGenres(bookGenres.flat())
 
-  const filerBooks = (genre) => {
-    const newBooks = books.filter((book) =>{
-      return book.genres.includes(genre)
-    })
-    setDisplayedBooks(newBooks)
+  const filterBooks = (genre) => {
+    setGenre(genre)
  }
 
   return (
     <div>
       <h2>books</h2>
-        <h3>in genre</h3>
+        <h3>in genre {genre}</h3>
           <Book book={displayedBooks}/>
           <Buttons 
           uniqueGenres={uniqueBookGenres} 
           setDisplayedBooks={setDisplayedBooks} 
-          filterBooks={filerBooks}
-          books={books}
+          filterBooks={filterBooks}
           />
     </div>
   )
