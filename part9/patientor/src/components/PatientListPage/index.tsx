@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Box, Table, Button, TableHead, Typography, TableCell, TableRow, TableBody } from '@mui/material';
+import { Box, Table, Button, TableHead, Typography, TableCell, TableRow, TableBody} from '@mui/material';
 import axios from 'axios';
-
+import { BrowserRouter as _Router, Route, Link, Routes } from "react-router-dom";
 import { PatientFormValues, Patient } from "../../types";
 import AddPatientModal from "../AddPatientModal";
 
@@ -12,9 +12,10 @@ import patientService from "../../services/patients";
 interface Props {
   patients : Patient[]
   setPatients: React.Dispatch<React.SetStateAction<Patient[]>>
+  setPatientId: React.Dispatch<React.SetStateAction<string>>
 }
 
-const PatientListPage = ({ patients, setPatients } : Props ) => {
+const PatientListPage = ({ patients, setPatients, setPatientId } : Props ) => {
 
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [error, setError] = useState<string>();
@@ -25,6 +26,10 @@ const PatientListPage = ({ patients, setPatients } : Props ) => {
     setModalOpen(false);
     setError(undefined);
   };
+
+  const patientId = (id:string) => {
+    setPatientId(id);
+  }
 
   const submitNewPatient = async (values: PatientFormValues) => {
     try {
@@ -66,7 +71,7 @@ const PatientListPage = ({ patients, setPatients } : Props ) => {
         <TableBody>
           {Object.values(patients).map((patient: Patient) => (
             <TableRow key={patient.id}>
-              <TableCell>{patient.name}</TableCell>
+              <TableCell><Button component={Link} to={`/patients/${patient.id}`} onClick={()=>patientId(patient.id)}>{patient.name}</Button></TableCell>
               <TableCell>{patient.gender}</TableCell>
               <TableCell>{patient.occupation}</TableCell>
               <TableCell>
